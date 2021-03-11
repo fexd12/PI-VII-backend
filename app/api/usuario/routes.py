@@ -3,7 +3,7 @@ from app.erros import bad_request
 from app import cross_origin,db
 from flask import jsonify,request
 from app.authenticate import check_token_dec,decode_token
-from app.models import Usuario,Cadastro,Funcao,
+from app.models import Usuario,Cadastro,Funcao
 import json
 
 @bp.route('/', methods=['GET'])
@@ -125,7 +125,9 @@ def new_user():
         return bad_request(403,'Use um outro email')
 
     data['ativo'] = 'S'
-    
+
+    data['funcao_id'] = data['funcao']
+
     usuario = Usuario()
     usuario.from_dict(data)
 

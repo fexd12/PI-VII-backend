@@ -12,9 +12,6 @@ def create_app(config_class = Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # app.redis = Redis.from_url(app.config['REDIS_URL'])
-    # app.task_queue = rq.Queue('pi_task',connection=app.redis)
-
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app,db)
@@ -24,18 +21,9 @@ def create_app(config_class = Config):
 
     from app.api.login import bp as login_bp
     app.register_blueprint(login_bp,url_prefix='/login')
-    
-    from app.api.salas import bp as salas_bp
-    app.register_blueprint(salas_bp,url_prefix='/salas')
 
-    from app.api.tag import bp as tag_bp
-    app.register_blueprint(tag_bp,url_prefix='/tag')
-
-    from app.api.email import bp as email_bp
-    app.register_blueprint(email_bp,url_prefix='/email')
-
-    from app.api.agendamento import bp as agendamento_bp
-    app.register_blueprint(agendamento_bp,url_prefix='/agendamento')
+    from app.api.envio import bp as envio_bp
+    app.register_blueprint(envio_bp,url_prefix='/envio')
 
     return app
 
