@@ -7,5 +7,5 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['redis','flask-mail','rq','Flask','python-dotenv','psycopg2-binary','flask-sqlalchemy','Flask-Migrate','PyJWT','flask-cors', 'flask-wtf']
+    install_requires=['Flask','python-dotenv','psycopg2-binary','flask-sqlalchemy','Flask-Migrate','PyJWT','flask-cors','qrcode','pillow']
 )
