@@ -6,4 +6,6 @@ class Cores(db.Model,AutoAttributes):
     id_cores = db.Column(db.Integer, primary_key = True)
     nome = db.Column(db.Text, nullable = False, unique=True)
 
-    attrs = ['id_cores','nome']
+    cores_direcao = db.relationship('CoresDirecao', backref='cores_direcao', lazy=True)
+
+    attrs = ['id_cores','nome','cores_direcao']
