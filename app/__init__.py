@@ -25,6 +25,9 @@ def create_app(config_class = Config):
     from app.api.envio import bp as envio_bp
     app.register_blueprint(envio_bp,url_prefix='/envio')
 
+    from app.api.separacao import bp as separacao_bp
+    app.register_blueprint(separacao_bp,url_prefix='/separacao')
+
     return app
 
 import app.models
