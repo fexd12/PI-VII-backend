@@ -113,12 +113,14 @@ def get_usuario_token():
 
 @bp.route('/',methods=['POST'])
 @cross_origin()
-@check_token_dec
+# @check_token_dec
 def new_user():
     data = request.get_json()
 
-    if 'nome' not in data or 'email' not in data or 'senha' not in data :
-        return bad_request(403,'Precisa passar nome, email,senha')
+    data['funcao'] = 1 
+
+    if 'nome' not in data or 'email' not in data or 'senha' not in data or 'funcao' not in data :
+        return bad_request(403,'Precisa passar nome, email,senha,funcao')
     if Usuario.query.filter_by(nome=data['nome']).first():
         return bad_request(403,'Use um outro nome')
     if Usuario.query.filter_by(email=data['email']).first():

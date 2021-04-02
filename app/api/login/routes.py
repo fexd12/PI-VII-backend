@@ -7,7 +7,7 @@ from app.erros import bad_request
 
 @bp.route('/',methods=['POST'])
 @cross_origin()
-def login():
+def cadastrar():
     data = request.get_json()
 
     if data['email'] and data['senha']:
@@ -20,8 +20,7 @@ def login():
         if user is None or not check_senha.check(data['senha']):
 
             return bad_request(403,'usuario e/ou senha errado')
-        # login_user(user)
-        # print(str(user.nome))
+
         token = generate_token(user)
         return jsonify({
             'message':'usuario {} autenticado com sucesso '.format(str(user.nome)),
@@ -29,7 +28,9 @@ def login():
             'success':1,
             'token':token
         })
-    return bad_request(403,'não foi informado credenciais para login')
+    else:
+
+        return bad_request(403,'não foi informado credenciais para login')
 
 @bp.route('/',methods=['GET'])
 @cross_origin()

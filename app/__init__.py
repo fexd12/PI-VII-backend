@@ -1,7 +1,7 @@
 from flask import Flask,current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from config import Config
+from config import Config,ProductionConfig
 from flask_cors import CORS,cross_origin
 
 db = SQLAlchemy()
@@ -10,6 +10,7 @@ cors = CORS()
 
 def create_app(config_class = Config):
     app = Flask(__name__)
+    # app.config.from_object(ProductionConfig)
     app.config.from_object(config_class)
 
     cors.init_app(app)

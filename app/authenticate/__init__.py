@@ -1,10 +1,11 @@
 from werkzeug.security import generate_password_hash,check_password_hash
-import jwt
 from app import current_app
 from flask import jsonify,request
 from functools import wraps
 from datetime import datetime
 from time import time
+
+import jwt
 
 def generate_hash(passwd):
     hash_passwd = generate_password_hash(passwd)
@@ -24,7 +25,8 @@ def generate_token(user,expiration_in = 7200):
         'exp': time() + expiration_in,
         'iat': time()
     }
-    token = jwt.encode(payload,current_app.config['SECRET_KEY'],algorithm='HS256').decode('utf-8')
+    token = jwt.encode(payload,current_app.config['SECRET_KEY'],algorithm='HS256')
+    # print(token)
     return token
 
 def check_token(token):
