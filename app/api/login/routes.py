@@ -28,9 +28,7 @@ def cadastrar():
             'success':1,
             'token':token
         })
-    else:
-
-        return bad_request(403,'não foi informado credenciais para login')
+    return bad_request(403,'não foi informado credenciais para login')
 
 @bp.route('/',methods=['GET'])
 @cross_origin()

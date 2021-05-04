@@ -1,3 +1,4 @@
+import re
 from . import bp
 from app.erros import bad_request
 from app import cross_origin
@@ -35,42 +36,47 @@ def convert_image(image_64:str) -> str:
     except Exception as e:
         raise e
 
-def rotacao_motor(direcao:int) -> list:
-    try:
-        get_direcao = Direcao.query.filter_by(id_direcao=direcao).first()
-        
-        rotacao_direita = ['direita'] # recebera a matriz correspondete ao movimento da direita
-        rotacao_esquerda = ['esquerda']# recebera a matriz correspondete ao movimento da esquerda
-
-        return rotacao_direita if get_direcao.nome == 'right' else rotacao_esquerda
-    except Exception as e:
-        raise e
-        # return bad_request(500,'não foi possivel trazer a direção do motor')
-
 @bp.route('/',methods=['POST'])
 @cross_origin()
-@check_token_dec
+# @check_token_dec
 def get_predict():
     try:
+        
         data = request.get_json()
 
+        # print(request)
+        # print(request.data)
+
+        data_receveid = json.loads(request.data)
+        # print(data_receveid)
         headers = {"content-type":"application/json"}
 
-        img = convert_image(data['image'])
+        img = convert_image(data_receveid['image'])
 
-        response = requests.post("http://10.128.0.2:9000/v1/models/IA_PI-VII:predict",data=img,headers=headers) # request ao tensorflow serving 
+        response = requests.post("http://34.72.212.91:9000/v1/models/IA_PI-VII:predict",data=img,headers=headers) # request ao tensorflow serving 
 
-        predict_class = response.json()['predict']
+        predictions = response.json()['predictions']
 
-        cor = Cores.query.filter_by(nome=predict_class).first()
+        labels = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
+
+        predict_class = np.argmax(predictions[0])
+
+        predict_cor = labels[predict_class]
+        
+        cor = Cores.query.filter_by(nome=predict_cor).first()
+
+        print(cor)
         direcao = CoresDirecao.query.filter_by(cor_id = cor.id_cores).first()
+        print(direcao)
 
-        mover_motor = rotacao_motor(direcao.direcao_id)
+        mover_motor = Direcao.query.filter_by(id_direcao=direcao.direcao_id).first()
+        print(mover_motor)
 
         return jsonify({
-            'predict_class':predict_class,
-            'direcao':mover_motor
+            'predict_class': predict_cor,
+            'direcao': str(mover_motor.id_direcao)
         })
-        
+
     except Exception as e:
+        print(e)
         return bad_request(500,'não foi possivel fazer a previsão da cor.')
