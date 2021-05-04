@@ -1,19 +1,20 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:3.8-alpine
 
-EXPOSE 2000
-
 WORKDIR /app
 
-COPY . /app
+COPY . .
 
 # Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE=1
+# ENV PYTHONDONTWRITEBYTECODE=1
 
 # Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED=1
+# ENV PYTHONUNBUFFERED=1
 
 # Install pip requirements
+
+# RUN python -m venv venv
+
 RUN apk update \
     && apk add --virtual build-deps python3-dev musl-dev postgresql-dev gcc postgresql g++ \
     freetype-dev \
@@ -40,4 +41,10 @@ RUN pip install gunicorn
 # USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["gunicorn", "--bind", "0.0.0.0:2000", "pi:app"]
+
+EXPOSE 2000
+
+# CMD ["gunicorn", "--bind", "0.0.0.0:2000", "pi:app"]
+RUN chmod +x ./boot.sh
+
+ENTRYPOINT ["./boot.sh"]

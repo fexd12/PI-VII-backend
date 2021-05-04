@@ -15,6 +15,7 @@ class Config(object):
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}/{}?user={}&password={}' \
             .format(DB_SERVER,DB_DATABASE,DB_USER,DB_PASSWD)
+    # print(SQLALCHEMY_DATABASE_URI)
 
 class ProductionConfig(Config):
     DB_SERVER = os.environ.get('DB_SERVER_PROD')
