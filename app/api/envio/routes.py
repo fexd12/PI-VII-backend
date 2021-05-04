@@ -49,18 +49,22 @@ def envio():
         print(e)
         return bad_request(403,'Não foi possivel trazer usuario')
 
-@bp.route('/qrcode',methods=['GET'])
+@bp.route('/qrcode',methods=['POST'])
+@cross_origin()
+@check_token_dec
 def qr_code():
 
     try:
 
-        data= request.get_json()
+        data = request.get_json()
 
-        qrcode_ = make_qr_code('teste')
+        dados_envio = Envio.query.filter_by(codigo_envio=data['id_envio']).first()
+        print(dados_envio)
+        qrcode_ = make_qr_code(dados_envio.to_dict())
 
         message = {
             'message':'qrcode criado',
-            'data': [qrcode_]
+            'img': [qrcode_]
         }
 
         return jsonify(message),200
