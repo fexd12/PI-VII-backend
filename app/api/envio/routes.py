@@ -29,10 +29,16 @@ def envio():
 
     try:
 
-        data= request.get_json()
+        data = request.get_json()
 
         data['codigo_envio'] = uuid.uuid4()
+        data['token'] = uuid.uuid4()
+
         data['usuario_id'] = data['id_usuario']
+        
+        qrcode_ = make_qr_code(data)
+        
+        data['qr_code'] = qrcode_
 
         envio_ = Envio()
         envio_.from_dict(data)
@@ -44,27 +50,42 @@ def envio():
             'message':'Envio criado'
         }
 
-        return jsonify(message),200
+        return jsonify(message),201
     except Exception as e:
         print(e)
         return bad_request(403,'Não foi possivel trazer usuario')
 
-@bp.route('/qrcode',methods=['POST'])
+@bp.route('/qrcode',methods=['GET'])
 @cross_origin()
 @check_token_dec
 def qr_code():
 
     try:
 
-        data = request.get_json()
+        token = request.headers.get('x-access-token')
 
-        dados_envio = Envio.query.filter_by(codigo_envio=data['id_envio']).first()
-        print(dados_envio)
-        qrcode_ = make_qr_code(dados_envio.to_dict())
+        verify_token = decode_token(token)
+        user_id = verify_token['id_user']
+
+        users = Envio.query.join(Usuario,Envio.usuario_id == Usuario.id_usuario) \
+            .filter(Usuario.ativo == 'S',Usuario.id_usuario == user_id) \
+            .add_columns(Usuario.id_usuario,Usuario.nome,Envio.codigo_envio,Envio.qr_code) \
+            .all()
+        
+        items= []
+
+        for row in users:
+            items.append({
+                'id_usuario':row[1],
+                'nome':row[2],
+                'codigo_envio':row[3],
+                'qr_code':row[4],
+            })
+
+        print(items)
 
         message = {
-            'message':'qrcode criado',
-            'img': [qrcode_]
+            'items': items
         }
 
         return jsonify(message),200
