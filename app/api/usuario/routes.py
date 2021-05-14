@@ -40,13 +40,15 @@ def get_usuario():
 @check_token_dec
 def delet_user():
     try:
-        # token = request.headers.get('x-access-token')
+        token = request.headers.get('x-access-token')
 
-        # verify_token = decode_token(token)
-        # user_id = verify_token['id_user']
-        user_id  = request.get_json()
+        verify_token = decode_token(token)
 
-        user = Usuario.query.filter_by(id_usuario=user_id['id_usuario']).first()
+        user_id = verify_token['id_user']
+        
+        data  = request.get_json()
+
+        user = Usuario.query.filter_by(id_usuario=user_id).first()
 
         user.ativo = 'N'
         
@@ -60,14 +62,21 @@ def delet_user():
     except Exception as e:
         return bad_request(403,'erro ao deletar usuario')
 
-@bp.route('/editar/',methods=['PUT'])
+@bp.route('/',methods=['PUT'])
 @cross_origin()
 @check_token_dec
 def edit_user():
     try:
         data = request.get_json()
 
-        user = Usuario.query.filter_by(id_usuario=data['id_usuario']).first()
+        token = request.headers.get('x-access-token')
+
+        verify_token = decode_token(token)
+
+        user_id = verify_token['id_user']
+
+        user = Usuario.query.filter_by(id_usuario=int(user_id)).first()
+        data['id_usuario'] = int(user_id)
 
         user.from_dict(data)
 
@@ -80,7 +89,8 @@ def edit_user():
         return jsonify(message),200
 
     except Exception as identifier:
-        return bad_request(403,'erro ao editar usuario')
+        print(identifier)
+        return bad_request(500,'erro ao editar usuario')
 
 @bp.route('/token/', methods=['GET'])
 @check_token_dec
@@ -155,13 +165,12 @@ def reset_pass():
     token = request.headers.get('x-access-token')
     data = request.get_json()
 
-    if int(data.get('nova_senha')):
-        verify_token = decode_token(token)
-        user_id = verify_token['id_user']
-    else:
-        user_id = data['id_usuario']
-
     try:
+        if int(data.get('nova_senha')):
+            verify_token = decode_token(token)
+            user_id = verify_token['id_user']
+        else:
+            user_id = data['id_usuario']
         user = Usuario.query.filter_by(id_usuario=user_id).first()
     except Exception as e:
         return bad_request(403,'Não possui usuario com esse email')

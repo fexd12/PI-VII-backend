@@ -82,7 +82,7 @@ def qr_code():
                 'qr_code':row[4],
             })
 
-        print(items)
+        # print(items)
 
         message = {
             'items': items
