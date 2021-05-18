@@ -13,7 +13,6 @@ class Usuario(db.Model,AutoAttributes):
 
     funcao_id = db.Column(db.Integer, db.ForeignKey('funcao.id_funcao'))
 
-    envios_usuario = db.relationship('Envio', backref='envio_usuario', lazy=True)
     cadastro_usuario = db.relationship('Cadastro', backref='cadastro_usuario', lazy=True)
 
     attrs = ['id_usuario','nome','email','ativo','funcao_id']

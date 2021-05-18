@@ -8,7 +8,6 @@ class Envio(db.Model,AutoAttributes):
     codigo_envio = db.Column(db.Text)
     qr_code = db.Column(db.Text)
     token = db.Column(db.Text)
+    codigo_pedido = db.Column(db.Text, db.ForeignKey('pedido.cod_pedido'))
 
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id_usuario'))
-
-    attrs = ['id_envio','codigo_envio','qr_code','token',' usuario_id']
+    attrs = ['id_envio','codigo_envio','qr_code','token','codigo_pedido']

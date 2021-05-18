@@ -5,3 +5,6 @@ from app.models.cores import Cores
 from app.models.envio import Envio
 from app.models.direcao import Direcao
 from app.models.cores_direcao import CoresDirecao
+from app.models.pedido import Pedido
+from app.models.produto import Produto
+from app.models.produtos_pedidos import ProdutosPedidos
