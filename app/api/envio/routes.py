@@ -1,9 +1,10 @@
+from re import M
 from . import bp
 from app.erros import bad_request
 from app import cross_origin,db
 from flask import jsonify,request
 from app.authenticate import check_token_dec,decode_token
-from app.models import Usuario,Cadastro,Funcao,Envio
+from app.models import Envio,Pedido,Usuario, pedido
 import json,qrcode,uuid,base64,io
 
 def make_qr_code(data):
@@ -24,23 +25,29 @@ def make_qr_code(data):
 
 @bp.route('/',methods=['POST'])
 @cross_origin()
-@check_token_dec
+# @check_token_dec
 def envio():
 
     try:
+        def generate_uuid():
+            id = uuid.uuid4()
+            return id.hex
 
         data = request.get_json()
 
-        data['codigo_envio'] = uuid.uuid4()
-        data['token'] = uuid.uuid4()
-
+        data['codigo_envio'] = generate_uuid()
+        data['token'] = generate_uuid()
+        data['codigo_pedido'] = data['cod_pedido']
         data['usuario_id'] = data['id_usuario']
         
-        qrcode_ = make_qr_code(data)
+        # print(data)
+        
+        qrcode_ = make_qr_code(json.dumps(data))
         
         data['qr_code'] = qrcode_
 
         envio_ = Envio()
+        # print(envio_.__table__.columns)
         envio_.from_dict(data)
         
         db.session.add(envio_)
@@ -67,19 +74,20 @@ def qr_code():
         verify_token = decode_token(token)
         user_id = verify_token['id_user']
 
-        users = Envio.query.join(Usuario,Envio.usuario_id == Usuario.id_usuario) \
-            .filter(Usuario.ativo == 'S',Usuario.id_usuario == user_id) \
-            .add_columns(Usuario.id_usuario,Usuario.nome,Envio.codigo_envio,Envio.qr_code) \
+        pedidos = Envio.query.join(Pedido,Pedido.cod_pedido == Envio.codigo_pedido) \
+            .filter(Pedido.usuario_id == user_id) \
+            .add_columns(Pedido.usuario_id,Envio.codigo_envio,Envio.qr_code,Envio.codigo_pedido,Envio.token) \
             .all()
         
         items= []
 
-        for row in users:
+        for row in pedidos:
             items.append({
                 'id_usuario':row[1],
-                'nome':row[2],
-                'codigo_envio':row[3],
-                'qr_code':row[4],
+                'codigo_envio':row[2],
+                'qr_code':row[3],
+                "codigo_pedido":row[4],
+                "token":row[5]
             })
 
         # print(items)
@@ -92,3 +100,50 @@ def qr_code():
     except Exception as e:
         print(e)
         return bad_request(403,'Não foi possivel trazer usuario')
+
+
+@bp.route('/autenticar',methods=['POST'])
+# @cross_origin()
+@check_token_dec
+def att_status():
+
+    try:
+
+        token = request.headers.get('x-access-token')
+
+        verify_token = decode_token(token)
+        user_id = verify_token['id_user']
+
+        data = request.get_json()
+
+        print(data)
+
+        envio_ = Envio.query.filter(Envio.token == data['token']).first()
+
+        user_ = Usuario.query.filter(Usuario.id_usuario == user_id).first()
+
+        pedido_ = Pedido.query.filter(Pedido.cod_pedido == envio_.codigo_pedido).first()
+
+        # new_pedido = Pedido()
+
+        # new_pedido.from_dict(pedido_.to_dict())
+        # print(pedido_.to_dict())
+
+        if user_.funcao_id:
+            if pedido_.status_id < 4:
+                pedido_.status_id += 1
+            else:
+                pedido_.status_id = 4
+        else:
+            pedido_.status_id = 4
+        
+        db.session.commit()
+        
+        message = {
+            'msg':'status do pedido atualizado com sucesso'
+        }
+
+        return jsonify(message),201
+    except Exception as e:
+        print(e)
+        return bad_request(403,'Não foi possivel atualizar status ')

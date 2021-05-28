@@ -31,6 +31,9 @@ def create_app(config_class = Config):
 
     from app.api.pedidos import bp as pedidos_bp
     app.register_blueprint(pedidos_bp,url_prefix='/pedidos')
+    
+    from app.api.direcao import bp as direcao_bp
+    app.register_blueprint(direcao_bp,url_prefix='/direcao')
 
     return app
 
