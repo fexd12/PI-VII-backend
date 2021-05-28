@@ -8,3 +8,4 @@ from app.models.cores_direcao import CoresDirecao
 from app.models.pedido import Pedido
 from app.models.produto import Produto
 from app.models.produtos_pedidos import ProdutosPedidos
+from app.models.status import Status
